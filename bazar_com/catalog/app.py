@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 import csv
+import os
+import requests
 
 app = Flask(__name__)
 
 DATA_FILE = 'catalog_data.csv'
+OTHER_REPLICA = os.getenv("OTHER_REPLICA", "")  # e.g., http://catalog2:5001
 
 def read_catalog():
     with open(DATA_FILE, newline='') as f:
@@ -45,12 +48,3 @@ def update(item_id):
             item["price"] = str(update_data.get("price", float(item["price"])))
             updated = True
             break
-
-    if updated:
-        write_catalog(catalog)
-        return jsonify({"message": "Updated successfully"})
-    else:
-        return jsonify({"error": "Item not found"}), 404
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=5001)
