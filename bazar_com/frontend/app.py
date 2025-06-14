@@ -66,3 +66,14 @@ def purchase(item_id):
     order_server = get_next_replica(ORDER_REPLICAS, "order")
     response = requests.post(f"{order_server}/purchase/{item_id}")
     return jsonify(response.json())
+# ------------------------------
+# Invalidate cache entry (used by backend servers)
+@app.route('/invalidate/<int:item_id>', methods=['POST'])
+def invalidate(item_id):
+    if item_id in CACHE:
+        del CACHE[item_id]
+    return jsonify({"message": f"Cache invalidated for item {item_id}"}), 200
+
+# ------------------------------
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000)
