@@ -48,3 +48,29 @@ def update(item_id):
             item["price"] = str(update_data.get("price", float(item["price"])))
             updated = True
             break
+          if updated:
+        write_catalog(catalog)
+
+        # Invalidate frontend cache
+        try:
+            requests.post("http://frontend:5000/invalidate/{}".format(item_id))
+        except:
+            pass
+
+        # Forward update to other replica (if exists and not forwarded)
+        if not request.headers.get("X-Replica-Forwarded") and OTHER_REPLICA:
+            try:
+                requests.post(
+                    f"{OTHER_REPLICA}/update/{item_id}",
+                    json=update_data,
+                    headers={"X-Replica-Forwarded": "true"}
+                )
+            except:
+                pass
+
+        return jsonify({"message": "Updated successfully"})
+    else:
+        return jsonify({"error": "Item not found"}), 404
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5001)
