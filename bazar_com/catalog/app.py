@@ -48,7 +48,8 @@ def update(item_id):
             item["price"] = str(update_data.get("price", float(item["price"])))
             updated = True
             break
-          if updated:
+
+    if updated:
         write_catalog(catalog)
 
         # Invalidate frontend cache
