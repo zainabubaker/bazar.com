@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - catalog1
+      - catalog2
+      - order1
+      - order2
+
+  catalog1:
+    build: ./catalog
+    environment:
+      - OTHER_REPLICA=http://catalog2:5001
+    ports:
+      - "5001:5001"
+
+  catalog2:
+    build: ./catalog
+    environment:
+      - OTHER_REPLICA=http://catalog1:5001
+    ports:
+      - "5003:5001"
+
+  order1:
+    build: ./order
+    environment:
+      - CATALOG_SERVER=http://catalog1:5001
+      - OTHER_REPLICA=http://order2:5002
+      - FRONTEND_SERVER=http://frontend:5000
+    ports:
+      - "5002:5002"
+
+  order2:
+    build: ./order
+    environment:
+      - CATALOG_SERVER=http://catalog1:5001
+      - OTHER_REPLICA=http://order1:5002
+      - FRONTEND_SERVER=http://frontend:5000
+    ports:
+      - "5004:5002"
