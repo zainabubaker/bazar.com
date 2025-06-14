@@ -1,3 +1,24 @@
+version: '3'
+services:
+  catalog:
+    build: ./catalog
+    ports:
+      - "5001:5001"
+
+  order:
+    build: ./order
+    ports:
+      - "5002:5002"
+    depends_on:
+      - catalog
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - catalog
+      - order
 version: '3.9'
 
 services:
